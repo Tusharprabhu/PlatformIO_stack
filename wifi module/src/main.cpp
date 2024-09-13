@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
-#define Wifi_ssdi "Sky"
-#define Wifi_password "5432154321"
+#define Wifi_ssdi "Galaxy S20 FE 5G"
+#define Wifi_password "ineedhelp"
 
 void setup()
 {
@@ -15,7 +15,7 @@ void setup()
 bool isConnected = false;
 void loop()
 {
-  if (WiFi.status() == WL_CONNECTED && !isConnected)
+  if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("Connected to wifi");
     digitalWrite(LED_BUILTIN, HIGH);
