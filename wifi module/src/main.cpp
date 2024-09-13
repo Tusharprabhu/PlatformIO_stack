@@ -1,18 +1,32 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include <WiFi.h>
+#define Wifi_ssdi "Sky"
+#define Wifi_password "5432154321"
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+void setup()
+{
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  WiFi.begin(Wifi_ssdi, Wifi_password);
+
+  Serial.println("Starting");
 }
+bool isConnected = false;
+void loop()
+{
+  if (WiFi.status() == WL_CONNECTED && !isConnected)
+  {
+    Serial.println("Connected to wifi");
+    digitalWrite(LED_BUILTIN, HIGH);
+    isConnected = true;
+  }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println(".");
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(1000);
+    isConnected=false;
+  }
 }
