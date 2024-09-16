@@ -1,32 +1,63 @@
-#include <Arduino.h>
-
+#include <Arduino.h> 
 #include <WiFi.h>
-#define Wifi_ssdi "Galaxy S20 FE 5G"
-#define Wifi_password "ineedhelp"
 
-void setup()
-{
+const char* ssid = "ESP32-Access-Point";
+const char* password = "123456789";
+
+WiFiServer server(80);
+
+void setup() {
   Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
-  WiFi.begin(Wifi_ssdi, Wifi_password);
+  delay(10);
 
-  Serial.println("Starting");
+  Serial.println();
+  Serial.println();
+  Serial.print("Configuring access point...");
+  
+  WiFi.softAP(ssid, password);
+
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+  server.begin();
+
+  pinMode(2, OUTPUT);
 }
-bool isConnected = false;
-void loop()
-{
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("Connected to wifi");
-    digitalWrite(LED_BUILTIN, HIGH);
-    isConnected = true;
-  }
 
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println(".");
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(1000);
-    isConnected=false;
+void loop() {
+  WiFiClient client = server.available();
+
+  if (client) {
+    Serial.println("New Client.");
+    String currentLine = "";
+    while (client.connected()) {
+      if (client.available()) {
+        char c = client.read();
+        Serial.write(c);
+        if (c == '\n') {
+          if (currentLine.length() == 0) {
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println();
+            client.print("Click <a href=\"/H\">here</a> turn the LED on pin 2 on<br>");
+            client.print("Click <a href=\"/L\">here</a> turn the LED on pin 2 off<br>");
+            client.println();
+            break;
+          } else {
+            currentLine = "";
+          }
+        } else if (c != '\r') {
+          currentLine += c;
+        }
+        if (currentLine.endsWith("GET /H")) {
+          digitalWrite(2, HIGH);
+        }
+        if (currentLine.endsWith("GET /L")) {
+          digitalWrite(2, LOW);
+        }
+      }
+    }
+    client.stop();
+    Serial.println("Client Disconnected.");
   }
 }
