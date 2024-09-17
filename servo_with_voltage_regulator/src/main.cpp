@@ -70,34 +70,28 @@ void loop(){
           // that's the end of the client HTTP request, so send a response:
           if (currentLine.length() == 0) {
             // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-            // and a content-type so the client knows what's coming, then a blank line:
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println("Connection: close");
-            client.println();
+            // Create a String variable to hold the HTML content
+            String html = "HTTP/1.1 200 OK\r\n";
+            html += "Content-type:text/html\r\n";
+            html += "Connection: close\r\n\r\n";
+            html += "<!DOCTYPE html><html>";
+            html += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+            html += "<link rel=\"icon\" href=\"data:,\">";
+            html += "<style>body { text-align: center; font-family: \"Trebuchet MS\", Arial; margin-left:auto; margin-right:auto;}";
+            html += ".slider { width: 300px; }</style>";
+            html += "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>";
+            html += "</head><body><h1>ESP32 with Servo</h1>";
+            html += "<p>Position: <span id=\"servoPos\"></span></p>";
+            html += "<input type=\"range\" min=\"0\" max=\"180\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\"" + valueString + "\"/>";
+            html += "<script>var slider = document.getElementById(\"servoSlider\");";
+            html += "var servoP = document.getElementById(\"servoPos\"); servoP.innerHTML = slider.value;";
+            html += "slider.oninput = function() { slider.value = this.value; servoP.innerHTML = this.value; }";
+            html += "$.ajaxSetup({timeout:1000}); function servo(pos) { ";
+            html += "$.get(\"/?value=\" + pos + \"&\"); {Connection: close};}</script>";
+            html += "</body></html>";
 
-            // Display the HTML web page
-            client.println("<!DOCTYPE html><html>");
-            client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-            client.println("<link rel=\"icon\" href=\"data:,\">");
-            // CSS to style the on/off buttons 
-            // Feel free to change the background-color and font-size attributes to fit your preferences
-            client.println("<style>body { text-align: center; font-family: \"Trebuchet MS\", Arial; margin-left:auto; margin-right:auto;}");
-            client.println(".slider { width: 300px; }</style>");
-            client.println("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
-                     
-            // Web Page
-            client.println("</head><body><h1>ESP32 with Servo</h1>");
-            client.println("<p>Position: <span id=\"servoPos\"></span></p>");          
-            client.println("<input type=\"range\" min=\"0\" max=\"180\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\""+valueString+"\"/>");
-            
-            client.println("<script>var slider = document.getElementById(\"servoSlider\");");
-            client.println("var servoP = document.getElementById(\"servoPos\"); servoP.innerHTML = slider.value;");
-            client.println("slider.oninput = function() { slider.value = this.value; servoP.innerHTML = this.value; }");
-            client.println("$.ajaxSetup({timeout:1000}); function servo(pos) { ");
-            client.println("$.get(\"/?value=\" + pos + \"&\"); {Connection: close};}</script>");
-           
-            client.println("</body></html>");     
+            // Send the HTML content to the client
+            client.print(html);
             
             //GET /?value=180& HTTP/1.1
             if(header.indexOf("GET /?value=")>=0) {
